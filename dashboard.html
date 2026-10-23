@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contacts | Contact Manager</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <header class="navbar">
+    <span class="brand">📇 Contact Manager</span>
+    <nav>
+      <a href="dashboard.html" class="active">Contacts</a>
+      <a href="contact.html">Contact Us</a>
+      <a href="frameworks/vue.html">Vue version</a>
+      <a href="frameworks/react.html">React version</a>
+    </nav>
+    <div class="nav-right">
+      <span id="navUser"></span>
+      <button class="btn small light" id="logoutBtn">Logout</button>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ===== Add / Edit form ===== -->
+    <section class="card">
+      <h2 id="formTitle">Add a contact</h2>
+      <form id="userForm" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input id="name" placeholder="Full name" />
+            <p class="error" id="nameError"></p>
+          </div>
+          <div class="form-group">
+            <label for="userEmail">Email</label>
+            <input id="userEmail" type="email" placeholder="name@mail.com" />
+            <p class="error" id="userEmailError"></p>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone</label>
+            <input id="phone" placeholder="10 digit number" />
+            <p class="error" id="phoneError"></p>
+          </div>
+          <div class="form-group">
+            <label for="city">City</label>
+            <input id="city" placeholder="City" />
+            <p class="error" id="cityError"></p>
+          </div>
+        </div>
+        <button type="submit" class="btn" id="saveBtn">Add contact</button>
+        <button type="button" class="btn secondary" id="cancelEditBtn" hidden>Cancel edit</button>
+        <p class="form-message" id="userFormMessage"></p>
+      </form>
+    </section>
+
+    <!-- ===== Table ===== -->
+    <section class="card">
+      <div class="list-header">
+        <h2>Contacts</h2>
+      </div>
+
+      <div class="toolbar">
+        <input type="search" id="searchInput" placeholder="🔍 Search by name, email or city..." />
+        <button class="btn secondary" id="refreshBtn">↻ Reload from API</button>
+      </div>
+      <p class="status" id="status">Loading...</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th id="sortName" style="cursor: pointer" title="Click to sort">Name ↕</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>City</th>
+              <th>Company</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <!-- rows are created by JavaScript in renderTable() -->
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

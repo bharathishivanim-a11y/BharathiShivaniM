@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Us | Contact Manager</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <header class="navbar">
+    <span class="brand">📇 Contact Manager</span>
+    <nav>
+      <a href="dashboard.html">Contacts</a>
+      <a href="contact.html" class="active">Contact Us</a>
+      <a href="frameworks/vue.html">Vue version</a>
+      <a href="frameworks/react.html">React version</a>
+    </nav>
+    <div class="nav-right">
+      <span id="navUser"></span>
+      <button class="btn small light" id="logoutBtn">Logout</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>Contact us</h2>
+      <form id="contactForm" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="cName">Your name</label>
+            <input id="cName" placeholder="Full name" />
+            <p class="error" id="cNameError"></p>
+          </div>
+          <div class="form-group">
+            <label for="cEmail">Your email</label>
+            <input id="cEmail" type="email" placeholder="name@mail.com" />
+            <p class="error" id="cEmailError"></p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="cSubject">Subject</label>
+          <select id="cSubject">
+            <option value="">-- Choose a subject --</option>
+            <option>General question</option>
+            <option>Bug report</option>
+            <option>Feedback</option>
+          </select>
+          <p class="error" id="cSubjectError"></p>
+        </div>
+
+        <div class="form-group">
+          <label for="cMessage">Message</label>
+          <textarea id="cMessage" rows="4" maxlength="300" placeholder="Write at least 10 characters..."></textarea>
+          <p class="char-count"><span id="charCount">0</span>/300</p>
+          <p class="error" id="cMessageError"></p>
+        </div>
+
+        <button type="submit" class="btn">Send message</button>
+        <button type="reset" class="btn secondary">Clear</button>
+        <p class="form-message" id="contactMessage"></p>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="list-header">
+        <h2>Sent messages (saved in localStorage)</h2>
+        <button class="btn small danger" id="clearAllBtn">Clear all</button>
+      </div>
+      <div id="messageList"></div>
+    </section>
+  </main>
+
+  <script src="js/auth.js"></script>
+  <script src="js/contact.js"></script>
+</body>
+</html>
