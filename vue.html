@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vue version | Contact Manager</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <!-- Vue 3 loaded from a CDN: no install, no build step -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
+<body>
+
+  <header class="navbar">
+    <span class="brand">📇 Contact Manager</span>
+    <nav>
+      <a href="../dashboard.html">Contacts</a>
+      <a href="../contact.html">Contact Us</a>
+      <a href="vue.html" class="active">Vue version</a>
+      <a href="react.html">React version</a>
+    </nav>
+    <div class="nav-right">
+      <span id="navUser"></span>
+      <button class="btn small light" id="logoutBtn">Logout</button>
+    </div>
+  </header>
+
+  <!-- Everything inside #app is controlled by Vue -->
+  <main class="container" id="app">
+    <section class="card">
+      <h2>Contacts — built with Vue</h2>
+
+      <div class="toolbar">
+        <!-- v-model = two-way binding: typing updates `search`, and `search` updates the box -->
+        <input type="search" v-model="search" placeholder="🔍 Search by name, email or city..." />
+        <!-- @click is Vue's shortcut for addEventListener("click") -->
+        <button class="btn secondary" @click="reload">↻ Reload from API</button>
+      </div>
+
+      <!-- {{ }} prints a value; it updates automatically when the value changes -->
+      <p class="status">{{ status }} — showing {{ filtered.length }} of {{ users.length }}</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Name</th><th>Email</th><th>City</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <!-- v-for repeats the <tr> once for each contact -->
+            <tr v-for="u in filtered" :key="u.id">
+              <td>{{ u.name }}</td>
+              <td>{{ u.email }}</td>
+              <td>{{ u.city }}</td>
+              <td><button class="btn small danger" @click="remove(u)">Delete</button></td>
+            </tr>
+            <!-- v-if shows this row only when nothing matches -->
+            <tr v-if="filtered.length === 0">
+              <td colspan="4" class="empty">No contacts found</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/api.js"></script>
+  <script>
+    setupNavbar("../index.html");
+
+    const { createApp } = Vue;
+
+    createApp({
+      // data(): the state. When it changes, Vue re-draws the page for us.
+      data() {
+        return {
+          users: [],
+          search: "",
+          status: "Loading...",
+        };
+      },
+
+      // computed: a value worked out from the state, re-calculated automatically
+      computed: {
+        filtered() {
+          const term = this.search.toLowerCase();
+          return this.users.filter((u) =>
+            (u.name + " " + u.email + " " + u.city).toLowerCase().includes(term)
+          );
+        },
+      },
+
+      // methods: functions used by the buttons
+      methods: {
+        async load(forceApi) {
+          // Same localStorage key as the plain JS dashboard, so the data is shared
+          const saved = JSON.parse(localStorage.getItem("users"));
+          if (saved && !forceApi) {
+            this.users = saved;
+            this.status = "Loaded from localStorage";
+            return;
+          }
+          const apiUsers = await api.getUsers(); // GET
+          this.users = apiUsers.map((u) => ({
+            id: u.id, name: u.name, email: u.email, phone: u.phone,
+            city: u.address.city, company: u.company.name,
+          }));
+          localStorage.setItem("users", JSON.stringify(this.users));
+          this.status = "GET ✔ from " + api.source;
+        },
+        reload() {
+          this.load(true);
+        },
+        async remove(user) {
+          if (!confirm("Delete " + user.name + "?")) return;
+          try { await api.deleteUser(user.id); } catch (e) { /* fake API, ignore */ }
+          this.users = this.users.filter((u) => u.id !== user.id);
+          localStorage.setItem("users", JSON.stringify(this.users));
+          this.status = "DELETE ✔ " + user.name;
+        },
+      },
+
+      // mounted(): runs once when the app first appears on the page
+      mounted() {
+        this.load(false);
+      },
+    }).mount("#app");
+  </script>
+</body>
+</html>

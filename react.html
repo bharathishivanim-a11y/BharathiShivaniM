@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>React version | Contact Manager</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <!-- React 18 + ReactDOM from a CDN, and Babel so the browser understands JSX -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+
+  <header class="navbar">
+    <span class="brand">📇 Contact Manager</span>
+    <nav>
+      <a href="../dashboard.html">Contacts</a>
+      <a href="../contact.html">Contact Us</a>
+      <a href="vue.html">Vue version</a>
+      <a href="react.html" class="active">React version</a>
+    </nav>
+    <div class="nav-right">
+      <span id="navUser"></span>
+      <button class="btn small light" id="logoutBtn">Logout</button>
+    </div>
+  </header>
+
+  <!-- React draws everything inside this div -->
+  <main class="container" id="root"></main>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/api.js"></script>
+  <script>setupNavbar("../index.html");</script>
+
+  <!-- type="text/babel" lets us write JSX (HTML-like code inside JavaScript) -->
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // A COMPONENT is just a function that returns what to show on screen
+    function ContactTable() {
+      // useState: a piece of state + a function to change it.
+      // Calling the setter makes React re-draw the component.
+      const [users, setUsers] = useState([]);
+      const [search, setSearch] = useState("");
+      const [status, setStatus] = useState("Loading...");
+
+      async function load(forceApi) {
+        const saved = JSON.parse(localStorage.getItem("users")); // shared with other versions
+        if (saved && !forceApi) {
+          setUsers(saved);
+          setStatus("Loaded from localStorage");
+          return;
+        }
+        const apiUsers = await api.getUsers(); // GET
+        const cleaned = apiUsers.map((u) => ({
+          id: u.id, name: u.name, email: u.email, phone: u.phone,
+          city: u.address.city, company: u.company.name,
+        }));
+        setUsers(cleaned);
+        localStorage.setItem("users", JSON.stringify(cleaned));
+        setStatus("GET ✔ from " + api.source);
+      }
+
+      // useEffect with [] runs once, after the component first appears
+      useEffect(() => { load(false); }, []);
+
+      async function remove(user) {
+        if (!confirm("Delete " + user.name + "?")) return;
+        try { await api.deleteUser(user.id); } catch (e) { /* fake API, ignore */ }
+        const remaining = users.filter((u) => u.id !== user.id);
+        setUsers(remaining);
+        localStorage.setItem("users", JSON.stringify(remaining));
+        setStatus("DELETE ✔ " + user.name);
+      }
+
+      // Search: worked out fresh on every render
+      const term = search.toLowerCase();
+      const filtered = users.filter((u) =>
+        (u.name + " " + u.email + " " + u.city).toLowerCase().includes(term)
+      );
+
+      // JSX: looks like HTML, but `className` instead of `class`, and {} to insert JS values
+      return (
+        <section className="card">
+          <h2>Contacts — built with React</h2>
+
+          <div className="toolbar">
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="🔍 Search by name, email or city..."
+            />
+            <button className="btn secondary" onClick={() => load(true)}>↻ Reload from API</button>
+          </div>
+
+          <p className="status">{status} — showing {filtered.length} of {users.length}</p>
+
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Name</th><th>Email</th><th>City</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                {filtered.map((u) => (
+                  <tr key={u.id}>
+                    <td>{u.name}</td>
+                    <td>{u.email}</td>
+                    <td>{u.city}</td>
+                    <td>
+                      <button className="btn small danger" onClick={() => remove(u)}>Delete</button>
+                    </td>
+                  </tr>
+                ))}
+                {filtered.length === 0 && (
+                  <tr><td colSpan="4" className="empty">No contacts found</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<ContactTable />);
+  </script>
+</body>
+</html>
